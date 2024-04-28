@@ -37,6 +37,8 @@ interest_over_time <- res$interest_over_time
 
 # Convert 'date' column to Date format
 interest_over_time$date <- as.Date(interest_over_time$date)
+interest_over_time <- interest_over_time %>%
+  filter(date >= as.Date("2023-10-17"))
 
 
 # Plot the interest over time
@@ -127,19 +129,10 @@ State_interest_binary$location <- as.factor(State_interest_binary$location)
 
 ```
 
-logistic regression model
-
-```{r}
-location_lm<- glm(keyword ~ location, data = State_interest_binary, family = "binomial")
-date_lm<- glm(keyword ~ date, data = res_interest, family = "binomial")
-
-summary(location_lm)
-summary(date_lm)
-
-```
 
 
-```{r}
+prepare data for statistical analysis
+```{r warning=FALSE}
 state_interest<-  gtrends(c("Israel genocide", "Israel terrorism"),
         geo = c("US"), 
         time = "today 12-m")
@@ -148,16 +141,81 @@ state_interest <- state_interest %>%
   mutate(hits = ifelse(hits == "" | hits == "<1", 0, as.numeric(hits)))
 
 
-
 interest_over_time$hits[is.na(interest_over_time$hits)] <- 0
-hits_lm_state <- lm(hits ~ location, data = state_interest)
+
+state_interest2 <- state_interest %>%
+  mutate(state_group = ifelse(hits < 1, "Other States", as.character(location)))
+
+state_interest2$state_group <- as.factor(state_interest2$state_group)
+state_interest2$state_group <- fct_relevel(state_interest2$state_group, "Other States")
+
+
+```
+
+Regression analysis
+
+```{r}
+hits_lm_state <- lm(hits ~ state_group, data = state_interest2)
 
 summary(hits_lm_state)
 
 hits_date_lm<- lm(hits~date, data = interest_over_time)
+str(interest_over_time)
 summary(hits_date_lm)
 ```
 
+
+
+t-test and ANOVA tests
+
+```{r}
+#t-test on hits by keyword
+keyword_t<- t.test(hits~keyword, data = interest_over_time)
+keyword_t
+
+#Anova on hits by states
+states_aov<- aov(hits~state_group, data = state_interest2)
+summary(states_aov)
+
+#Anova on hits by year
+year_aov<- aov(hits~date, data = interest_over_time)
+summary(year_aov)
+```
+
+plots keyword t-test
+
+```{r}
+ggplot(state_interest, aes(x = keyword, y = hits)) +
+  geom_boxplot() +
+  xlab("Keyword") +
+  ylab("Hits") +
+  ggtitle("Mean Hits by Keyword")
+```
+
+State ANOVA plot
+
+```{r}
+ggplot(state_interest2, aes(x = state_group, y = hits)) +
+  geom_boxplot() +
+  xlab("State Group") +
+  ylab("Hits") +
+  ggtitle("Mean Hits by State Group")
+```
+
+
+Year ANOVA plot
+
+
+```{r}
+
+interest_over_time$date <- as.factor(interest_over_time$date)
+ggplot(interest_over_time, aes(x = date, y = hits)) +
+  geom_boxplot() +
+   xlab("Date") +
+  ylab("Hits") +
+  ggtitle("Mean Hits by Date")
+
+```
 
 
 
