@@ -174,11 +174,11 @@ keyword_t<- t.test(hits~keyword, data = interest_over_time)
 keyword_t
 
 #Anova on hits by states
-states_aov<- aov(hits~state_group, data = state_interest2)
+states_aov<- aov(hits~keyword+state_group, data = state_interest2)
 summary(states_aov)
 
 #Anova on hits by year
-year_aov<- aov(hits~date, data = interest_over_time)
+year_aov<- aov(hits~keyword+date, data = interest_over_time)
 summary(year_aov)
 ```
 
