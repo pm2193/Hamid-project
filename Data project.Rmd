@@ -218,6 +218,28 @@ ggplot(interest_over_time, aes(x = date, y = hits)) +
 ```
 
 
+```{r}
+summary_hits_israel_genocide <- res1 %>%
+  filter(keyword == "Israel genocide") %>%
+  summarize(minimum = min(hits, na.rm = TRUE),
+            lower_quartile = quantile(hits, 0.25, na.rm = TRUE),
+            median = median(hits, na.rm = TRUE),
+            mean = mean(hits, na.rm = TRUE),
+            upper_quartile = quantile(hits, 0.75, na.rm = TRUE),
+            maximum = max(hits, na.rm = TRUE))
+summary_hits_israel_terrorism <- res1 %>%
+  filter(keyword == "Israel terrorism") %>%
+  summarize(minimum = min(hits, na.rm = TRUE),
+            lower_quartile = quantile(hits, 0.25, na.rm = TRUE),
+            median = median(hits, na.rm = TRUE),
+            mean = mean(hits, na.rm = TRUE),
+            upper_quartile = quantile(hits, 0.75, na.rm = TRUE),
+            maximum = max(hits, na.rm = TRUE))
+
+summary(res1$hits)
+summary_hits_israel_genocide 
+summary_hits_israel_terrorism
+```
 
 
 
